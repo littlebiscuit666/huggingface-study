@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# 训练产物（用 04_lora_finetune.py 可一键复现，不入库避免仓库臃肿）
+qwen_iot_lora/
+
+# 本地数据/缓存（大文件，不入库）
+*.npz
+*.bin
+*.gguf
+checkpoints/
