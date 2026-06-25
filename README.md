@@ -1,10 +1,9 @@
 # HuggingFace-study · P3 端侧大模型
 
 > 目标：从「调 ollama API」升级到「用 transformers 写代码控制模型」，
-> 最终做出 **Qwen2.5-0.5B 量化 + LoRA 微调** 的 IoT 故障问答助手（简历作品 + 面试能讲）。
+> 最终做出 **Qwen2.5-0.5B 量化 + LoRA 微调** 的 IoT 故障问答助手。
 > 命中 JD：资格3（大模型架构与应用）。
 
-## 为什么是 transformers 而不是 ollama
 
 | | ollama | transformers |
 |---|---|---|
@@ -39,13 +38,6 @@ hf cache ls   # 应看到 model/Qwen/Qwen2.5-0.5B-Instruct 约 1GB
 cd huggingface-study
 python 01_load_and_chat.py
 ```
-
-## 学完第一步你应该能回答（面试点）
-
-- `tokenizer` 和 `model` 各自的作用？（前者 文本↔token id，后者 token id→概率）
-- 为什么 Instruct 模型要套 `chat_template`？（不套就是裸续写，不会对话）
-- `max_new_tokens` 和 `do_sample` 各控制什么？（长度 / 是否随机）
-- transformers 比 ollama 多了什么能力？（能改模型内部 → 微调、量化）
 
 ## 下一步路线
 
