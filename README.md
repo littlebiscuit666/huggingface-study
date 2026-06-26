@@ -36,6 +36,8 @@ hf cache ls   # 应看到 Qwen/Qwen2.5-0.5B-Instruct 约 1GB
 | `04_lora_finetune.py` | **LoRA 微调**做 IoT 故障问答 | label masking 只对答案算 loss；r=8 / q,v_proj | ✅ 可跑 |
 | `05_compare.py` | 微调前/后对比（含新问题泛化测试） | LoRA adapter 即插即用，不改动原权重 | ✅ 可跑 |
 | `06_ml_analysis.py` | 经典 ML 分析：K-Means 故障分群 + 线性回归趋势预警 | 无监督聚类 / StandardScaler 标准化 / 趋势外推（ML 预处理层） | ✅ 可跑 |
+| `07_quantization.py` | 量化：FP32 → INT8 动态量化 | 权重 4→1 字节省内存；动态量化原理；附 bitsandbytes NF4 GPU 版参考 | ✅ 可跑 |
+| `08_gguf_ollama.py` | GGUF：量化模型的存盘+直接加载 | 用 ollama 调本地 GGUF（Q4）；GGUF vs torch 动态量化对比 | ✅ 可跑 |
 
 ## 关键技术点（简历/面试可讲）
 
@@ -43,6 +45,7 @@ hf cache ls   # 应看到 Qwen/Qwen2.5-0.5B-Instruct 约 1GB
 - **Label masking（SFT 标准做法）**：输入 = [提问] + [答案]，提问段 labels 设 `-100`（PyTorch 忽略标记，不算 loss）——让模型学「怎么回答」而不是「怎么提问」。
 - **Chat template**：Instruct 模型不能喂裸文本，必须套 `<|im_start|>user ... <|im_end|>` 对话格式。
 - **Adapter 即插即用**：`PeftModel.from_pretrained(base, adapter)` 在原模型上挂载增量，原权重零修改——上线可热切换、可多 adapter 共存。
+- **量化（INT8/4-bit）**：把权重从 FP32 压成 INT8（CPU 动态量化，省约 47% 内存）甚至 4-bit（GPU 上 bitsandbytes NF4），用微小精度换体积/速度；量化底座 + LoRA adapter = **QLoRA** 端侧部署套路。
 
 ## 运行
 
@@ -54,6 +57,8 @@ python 03_can_i_finetune.py   # 3. 实测能不能微调（打印峰值内存判
 python 04_lora_finetune.py    # 4. LoRA 微调，产出 ./qwen_iot_lora/ adapter
 python 05_compare.py          # 5. 看微调前后回答对比
 python 06_ml_analysis.py      # 6. 经典 ML：K-Means 故障分群 + 回归趋势预警
+python 07_quantization.py     # 7. 量化：FP32→INT8，省内存（附 GPU NF4 参考）
+python 08_gguf_ollama.py      # 8. GGUF：量化模型存盘+直接加载（需 ollama 后台运行）
 ```
 
 设备：优先 MPS（Apple GPU），不可用自动回退 CPU。Qwen2.5-0.5B 在普通笔记本上全程可跑，无需独显。
