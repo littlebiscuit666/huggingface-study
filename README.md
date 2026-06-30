@@ -12,7 +12,7 @@
 | 用法 | 调 API，模型当黑盒 | 模型对象在进程里，能改/微调/量化 |
 | 能学到的 | 推理调用 | **LoRA 微调、tokenizer、模型内部** ← JD 要的 |
 
-> ollama 里的 `qwen2.5:0.5b`（GGUF）和这里用的 `Qwen2.5-0.5B-Instruct`（HF 格式）是**同一个模型的不同打包**，transformers 只认后者。
+> ollama 里的 `qwen2.5:0.5b`（GGUF）和这里用的 `Qwen/Qwen2.5-0.5B-Instruct`（HF 格式）是**同一个模型的不同打包**，transformers 只认后者。
 
 ## 环境（一次性）
 
@@ -38,6 +38,8 @@ hf cache ls   # 应看到 Qwen/Qwen2.5-0.5B-Instruct 约 1GB
 | `06_ml_analysis.py` | 经典 ML 分析：K-Means 故障分群 + 线性回归趋势预警 | 无监督聚类 / StandardScaler 标准化 / 趋势外推（ML 预处理层） | ✅ 可跑 |
 | `07_quantization.py` | 量化：FP32 → INT8 动态量化 | 权重 4→1 字节省内存；动态量化原理；附 bitsandbytes NF4 GPU 版参考 | ✅ 可跑 |
 | `08_gguf_ollama.py` | GGUF：量化模型的存盘+直接加载 | 用 ollama 调本地 GGUF（Q4）；GGUF vs torch 动态量化对比 | ✅ 可跑 |
+| `07_music_review_finetune.py` | **LoRA 微调**做网易云风格乐评生成 | 风格迁移、文本生成、情感化写作 | ⏳ 等数据 |
+| `08_compare_music.py` | 乐评微调前/后对比 | 泛化能力、风格一致性 | ⏳ 等数据 |
 
 ## 关键技术点（简历/面试可讲）
 
@@ -65,7 +67,27 @@ python 08_gguf_ollama.py      # 8. GGUF：量化模型存盘+直接加载（需 
 
 ## 数据
 
+### IoT 问答数据
+
 `iot_qa.jsonl` —— 30 条 IoT 运维问答，`{question, answer}` 格式，答案统一是「**测 → 诊 → 调 → 验**」闭环风格（先复测确认、再诊断根因、再调整修复、最后验证）。
+
+### 网易云风格乐评数据
+
+`music_review.jsonl` —— 网易云风格乐评数据，`{messages: [...]}` 标准对话格式。
+
+数据字段说明：
+- `messages[0]`: system prompt（可选）
+- `messages[1]`: user，歌曲 + 背景
+- `messages[2]`: assistant，乐评正文（核心训练目标）
+
+网易云乐评风格建议（写训练数据时参考）：
+1. **画面感**：用具体场景/细节触发回忆（如"高三晚自习前的广播"、"凌晨三点的客厅"）
+2. **共情力**：戳中普遍情绪（孤独、成长、怀念、遗憾）
+3. **故事感**：有时间/人物/情节的小片段
+4. **留白感**：不说透，留想象空间
+5. **音乐关联**：和歌曲/歌手有呼应
+
+示例数据在 `music_review_example.jsonl`，可以参考格式写自己的 `music_review.jsonl`。
 
 ## 训练指标（运行 04 自动输出）
 

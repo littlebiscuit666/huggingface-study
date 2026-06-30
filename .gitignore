@@ -8,6 +8,10 @@ __pycache__/
 
 # 训练产物（用 04_lora_finetune.py 可一键复现，不入库避免仓库臃肿）
 qwen_iot_lora/
+qwen_music_lora/
+
+# Output files
+output.txt
 
 # 本地数据/缓存（大文件，不入库）
 *.npz
