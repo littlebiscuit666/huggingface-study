@@ -1,0 +1,21 @@
+{
+  "file": "cleaned_reviews.jsonl",
+  "total": 285,
+  "issues": {
+    "空文本": 0,
+    "过短(<8汉字)": 0,
+    "过长(>140字)": 0,
+    "精确重复": 0,
+    "高相似重复(前12字)": 113,
+    "疑似漏网噪声": 0
+  },
+  "length_stat": {
+    "min": 8,
+    "max": 39,
+    "avg": 29.6
+  },
+  "dup_rate": 0.0,
+  "bad_sample_count": 0,
+  "bad_samples": [],
+  "pass_rate": 100.0
+}

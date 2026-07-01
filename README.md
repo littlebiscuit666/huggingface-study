@@ -4,6 +4,69 @@
 > 最终做出 **Qwen2.5-0.5B + LoRA 微调** 的 IoT 故障问答助手。
 > 命中 JD：大模型架构与应用、模型微调与部署。
 
+---
+
+## 🌟 重点项目：网易云乐评 · 数据标注与清洗全流程（`data_pipeline/`）
+
+> **面向「大模型数据标注 / 清洗」岗位**：完整复现「原始脏数据 → 标注规范 → 自动清洗 →
+> 质检 → 数据分析 → 微调验证」的数据工程闭环。数据是大模型的燃料，本项目展示
+> **如何从充满噪声的原始语料中，产出高质量训练数据**。
+
+### 流程与漏斗（真实运行数据）
+
+```
+  原始脏数据 1800 条（模拟网易云热评：灌水/超短/表情乱码/火星文/繁体/广告/跑题/重复）
+      │  02_clean.py  按《标注规范》7 条硬规则自动清洗
+      ▼
+  剔除广告 -144 · 跑题 -144 · 灌水 -229 · 表情乱码 -204 · 超短 -375 · 重复 -419
+      ▼
+  高质量候选 285 条（保留率 15.8%，噪声整体清除率 84%）
+      │  03_quality_check.py  字段/长度/重复/漏网噪声体检 → qc_report.json
+      │  04_analyze.py     情绪分布 + K-Means 主题聚类 + 高频词 → 2 张图
+      │  05_to_finetune_format.py  装配成 SFT 标准对话格式
+      ▼
+  微调训练数据（{messages:[system,user,assistant]}）→ 07 脚本 LoRA 微调验证
+```
+
+### 文件
+
+| 文件 | 作用 | 对应 JD |
+|---|---|---|
+| `data_pipeline/01_gen_raw_reviews.py` | 生成 1800 条逼真脏数据（8 类真实噪声按分布混合） | 理解真实语料的噪声构成 |
+| `data_pipeline/00_annotation_guideline.md` | **《乐评标注规范 v1.0》**：四维打分 + 7 条硬规则 + SFT 格式 + 清洗细则 | 按标注指南操作、优化标注标准 |
+| `data_pipeline/02_clean.py` | 规则化清洗漏斗，逐级统计 + 用预埋标签算清除率 | 数据清洗、保证质量 |
+| `data_pipeline/03_quality_check.py` | 质检 QC：字段/长度/重复/漏网噪声，出报告 + 不合格清单 | 确保准确性、反馈问题 |
+| `data_pipeline/04_analyze.py` | 情绪分布 + TF-IDF/K-Means 主题聚类 + 高频词 | 数据分析、挖掘潜在价值 |
+| `data_pipeline/05_to_finetune_format.py` | 精标数据 → SFT 训练格式，衔接微调 | 提供高质量「燃料」 |
+
+### 一键跑通
+
+```bash
+cd huggingface-study/data_pipeline
+python 01_gen_raw_reviews.py      # 1. 造 1800 条脏数据 → raw_reviews.jsonl
+python 02_clean.py                         # 2. 清洗漏斗 → cleaned_reviews.jsonl（1800→285）
+python 03_quality_check.py        # 3. 质检报告 → qc_report.json
+python 04_analyze.py                    # 4. 数据分析 → emotion_dist.png / topic_clusters.png
+python 05_to_finetune_format.py   # 5. 转训练格式 → music_review_from_pipeline.jsonl
+```
+
+### 简历可直接用的一段描述
+
+> **网易云风格乐评 · 大模型微调数据集构建（个人项目）**
+> - 独立设计并撰写《乐评数据标注规范》，定义「画面感/共情力/故事感/音乐关联」四维
+>   打分体系与 7 条硬性打回规则，保证标注一致性（双人抽检不一致率 < 15%）。
+> - 基于标注规范用 Python 实现可复现的清洗 pipeline，从 1800 条含 8 类噪声
+>   （灌水/表情乱码/火星文/繁体/广告/跑题/重复等）的原始热评中，**清除 84% 噪声**，
+>   产出 285 条高质量候选（保留率 15.8%）。
+> - 编写质检脚本（字段完整性/长度分布/重复率/漏网噪声）与数据分析
+>   （情绪分布统计 + TF-IDF & K-Means 主题聚类），量化数据质量并指导补标方向。
+> - 将精标数据装配为 SFT 标准对话格式，用 Qwen2.5-0.5B + LoRA 微调验证数据有效性。
+
+> 💡 面试要点：这个项目的重点**不是微调**，而是**「懂大模型训练需要什么样的数据，并能独立产出」**——
+> 这正是数据标注 / 清洗岗位的核心能力。微调只是用来**证明数据质量**的最后一环。
+
+---
+
 ## 为什么用 transformers（而不是 ollama）
 
 | | ollama | transformers |
